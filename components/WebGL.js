@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
 
 class WebGL {
@@ -18,6 +19,13 @@ class WebGL {
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     this.scene = new THREE.Scene();
     this.scene.environment = this.resources.environment;
+
+    // Orbit controls for moving the camera up/down **TESTING**
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.25;
+    this.controls.screenSpacePanning = false;  
+    this.controls.maxPolarAngle = Math.PI / 2; 
 
     // Sort children by name - in this case coming from the Blender file - 0 to 7
     this.elements = new THREE.Group();
