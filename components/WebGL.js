@@ -15,17 +15,17 @@ class WebGL {
     this.renderer.setClearColor(0x252525, 0);
     this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
-    this.camera.position.set(2, 2, 2);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     this.scene = new THREE.Scene();
     this.scene.environment = this.resources.environment;
 
-    // Orbit controls for moving the camera up/down **TESTING**
+    // Orbit controls for moving the camera up/down
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.25;
     this.controls.screenSpacePanning = false;  
-    this.controls.maxPolarAngle = Math.PI / 2; 
+    this.controls.maxPolarAngle = Math.PI / 2;
+    this.controls.minDistance = 1;
+    this.controls.maxDistance = 3;
 
     // Sort children by name - in this case coming from the Blender file - 0 to 7
     this.elements = new THREE.Group();
@@ -52,17 +52,38 @@ class WebGL {
 
     // Start the initial wiggle animation for the palette
     this.initialWiggleAnimation();
+
+    // Adjust camera and controls initially
+    this.adjustCameraAndControls(window.innerWidth, window.innerHeight);
+
+    // Listen for window resize events
+    window.addEventListener('resize', () => this.setSize(window.innerWidth, window.innerHeight));
   }
 
   setSize(width, height) {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.adjustCameraAndControls(width, height);
+  }
+
+  adjustCameraAndControls(width, height) {
+    // Adjust camera position and controls based on aspect ratio
+    if (width > height) { // Landscape view
+      this.camera.position.set(2, 2, 2);
+      this.camera.fov = 37;
+    } else { // Portrait view
+      this.camera.position.set(2, 2, 2);
+      this.camera.fov = 45;
+    }
+    this.camera.updateProjectionMatrix();
+    this.controls.update();
   }
 
   update(rotation) {
     this.state.rotation = gsap.utils.interpolate(this.state.rotation, rotation, 0.1) * 0.1;
     this.scene.rotation.y = this.state.rotation;
+    this.controls.update(); // Ensure the controls update
   }
 
   render() {
@@ -70,7 +91,6 @@ class WebGL {
   }
 
   // Initialize wiggle animation with 360 icon on launch
-
   initialWiggleAnimation() {
     const icon = document.getElementById('icon-360');
     icon.style.opacity = 1; 
