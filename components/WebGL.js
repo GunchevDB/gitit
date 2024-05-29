@@ -21,9 +21,12 @@ class WebGL {
     // Orbit controls for moving the camera up/down
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    // this.controls.dampingFactor = 0.07;
-    // this.controls.rotateSpeed = 0.04;
-
+    this.controls.dampingFactor = 0.25;
+    this.controls.rotateSpeed = 0.4;
+    this.controls.screenSpacePanning = false;  
+    this.controls.maxPolarAngle = Math.PI / 2;
+    this.controls.minDistance = 1;
+    this.controls.maxDistance = 3;
 
     // Sort children by name - in this case coming from the Blender file - 0 to 7
     this.elements = new THREE.Group();
@@ -72,7 +75,7 @@ class WebGL {
       this.camera.fov = 37;
     } else { // Portrait view
       this.camera.position.set(2, 2, 2);
-      this.camera.fov = 55;
+      this.camera.fov = 45;
     }
     this.camera.updateProjectionMatrix();
     this.controls.update();
@@ -81,7 +84,7 @@ class WebGL {
   update(rotation) {
     // this.state.rotation = gsap.utils.interpolate(this.state.rotation, rotation, 0.1) * 0.1;
     // this.scene.rotation.y = this.state.rotation;
-    // this.controls.update(); // Ensure the controls update
+    // this.controls.update(); 
   }
 
   render() {
