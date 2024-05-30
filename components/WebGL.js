@@ -14,7 +14,7 @@ class WebGL {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.element, antialias: true });
     this.renderer.setClearColor(0x252525, 0);
     this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, 1, 1, 2000);
     this.scene = new THREE.Scene();
     this.scene.environment = this.resources.environment;
 
@@ -22,7 +22,7 @@ class WebGL {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.25;
-    this.controls.rotateSpeed = 0.4;
+    this.controls.rotateSpeed = 0.3;
     this.controls.screenSpacePanning = false;  
     this.controls.maxPolarAngle = Math.PI / 2;
     this.controls.minDistance = 1;
@@ -75,16 +75,16 @@ class WebGL {
       this.camera.fov = 37;
     } else { // Portrait view
       this.camera.position.set(2, 2, 2);
-      this.camera.fov = 45;
+      this.camera.fov = 65;
     }
     this.camera.updateProjectionMatrix();
     this.controls.update();
   }
 
   update(rotation) {
-    // this.state.rotation = gsap.utils.interpolate(this.state.rotation, rotation, 0.1) * 0.1;
-    // this.scene.rotation.y = this.state.rotation;
-    // this.controls.update(); 
+    this.state.rotation = gsap.utils.interpolate(this.state.rotation, rotation, 0.1) * 0.1;
+    this.scene.rotation.y = this.state.rotation;
+    this.controls.update(); 
   }
 
   render() {
@@ -143,7 +143,7 @@ class WebGL {
         }
       } else if (!initial && this.previousGroupIndexes.has(index) && index !== 0) { 
         const targetY = this.initialPositions[index].y + 1; 
-        gsap.to(child.position, { y: targetY, duration: 1, ease: "power2.in", onComplete: () => { child.visible = false; } }); // Quicker animation
+        gsap.to(child.position, { y: targetY, duration: 1, ease: "power2.in", onComplete: () => { child.visible = false; } });
       } else {
         child.visible = false;
       }

@@ -51,7 +51,7 @@ body * {
 .navigation {
   position: fixed;
   left: 0;
-  bottom: 0;
+  bottom: 20%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -61,7 +61,7 @@ body * {
 
 .navigation__button {
   padding: 1rem 2rem;
-  background: #fffa8a;
+  background: #42C16D;
   border-radius: 1rem;
   border: none;
   font-weight: 400;
@@ -93,7 +93,7 @@ body * {
 
 @media (min-width: 769px) {
   .navigation__button {
-    padding: 1rem 2rem;
+    padding: 6rem 1rem;
     font-size: 1.2rem;
   }
   .icon-360 {
