@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
+import { updateProgressBar, updateCardContent, initialWiggleAnimation } from "./ScreenFunctions";
 
 class WebGL {
   constructor(attributes = {}) {
@@ -22,8 +23,8 @@ class WebGL {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.25;
-    this.controls.rotateSpeed = 0.3;
-    this.controls.screenSpacePanning = false;  
+    this.controls.rotateSpeed = 0.1; // Reduce rotation speed
+    this.controls.screenSpacePanning = false;
     this.controls.maxPolarAngle = Math.PI / 2;
     this.controls.minDistance = 1;
     this.controls.maxDistance = 3;
@@ -37,11 +38,12 @@ class WebGL {
     // Track the current group index
     this.currentGroupIndex = 0;
     this.groups = [
-      [0],                    // Part 0
-      [0, 1],                 // Part 1 added
-      [0, 1, 2, 3],           // Parts 2 and 3 added
-      [0, 1, 2, 3, 4, 5],     // Parts 4 and 5 added
-      [0, 1, 2, 3, 4, 5, 6, 7], // Parts 6 and 7 added
+      { elements: [0], name: "Euro palette", icon: "fa-pallet", size: "80 x 120 x 14" }, // Part 0
+      { elements: [0, 1], name: "AB-12-15", icon: "fa-location-dot", size: "80 x 120 x 25" }, // Part 1 added
+      { elements: [0, 1, 2, 3], name: "AB-12-23", icon: "fa-location-dot", size: "80 x 30 x 30" }, // Parts 2 and 3 added
+      { elements: [0, 1, 2, 3, 4, 5], name: "AB-12-45", icon: "fa-location-dot", size: "34 x 20 x 30" }, // Parts 4 and 5 added
+      { elements: [0, 1, 2, 3, 4, 5, 6], name: "AB-12-18", icon: "fa-location-dot", size: "20 x 40 x 10" }, // Parts 6 added
+      { elements: [0, 1, 2, 3, 4, 5, 6, 7], name: "AB-12-34", icon: "fa-location-dot", size: "10 x 60 x 10" }, // Parts 7 added
     ];
 
     // Store initial positions and colors of the boxes
@@ -52,7 +54,7 @@ class WebGL {
     this.showGroup(this.currentGroupIndex, true);
 
     // Start the initial wiggle animation for the palette
-    this.initialWiggleAnimation();
+    initialWiggleAnimation(this.elements);
 
     // Adjust camera and controls initially
     this.adjustCameraAndControls(window.innerWidth, window.innerHeight);
@@ -71,7 +73,7 @@ class WebGL {
   adjustCameraAndControls(width, height) {
     // Adjust camera position and controls based on aspect ratio
     if (width > height) { // Landscape view
-      this.camera.position.set(2, 2, 2);
+      this.camera.position.set(2, 2, 1); // Move the camera right
       this.camera.fov = 37;
     } else { // Portrait view
       this.camera.position.set(2, 2, 2);
@@ -84,31 +86,15 @@ class WebGL {
   update(rotation) {
     this.state.rotation = gsap.utils.interpolate(this.state.rotation, rotation, 0.1) * 0.1;
     this.scene.rotation.y = this.state.rotation;
-    this.controls.update(); 
+    this.controls.update();
   }
 
   render() {
     this.renderer.render(this.scene, this.camera);
   }
 
-  // Initialize wiggle animation with 360 icon on launch
-  initialWiggleAnimation() {
-    const icon = document.getElementById('icon-360');
-    icon.style.opacity = 1; 
-
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        icon.style.opacity = 0; 
-      }
-    });
-    timeline.to(this.elements.rotation, { y: THREE.MathUtils.degToRad(15), duration: 0.5, ease: "power2.inOut" })
-            .to(this.elements.rotation, { y: 0, duration: 0.5, ease: "power2.inOut" })
-            .to(this.elements.rotation, { y: THREE.MathUtils.degToRad(-15), duration: 0.5, ease: "power2.inOut" })
-            .to(this.elements.rotation, { y: 0, duration: 0.5, ease: "power2.inOut" });
-  }
-
   highlight(child) {
-    child.material.color.set(0x00FF00); 
+    child.material.color.set(0x00ff00); 
   }
 
   resetHighlights() {
@@ -118,10 +104,10 @@ class WebGL {
     });
   }
 
-  // Bring new boxes by pressing Next 
+  // Bring new boxes by pressing Next
   showGroup(groupIndex, initial = false) {
     const children = this.elements.children[0].children;
-    const group = this.groups[groupIndex];
+    const group = this.groups[groupIndex].elements;
     const newIndexes = new Set(group);
 
     // Reset highlights before showing new group
@@ -132,7 +118,7 @@ class WebGL {
     children.forEach((child, index) => {
       if (newIndexes.has(index)) {
         child.visible = true;
-        if (!initial && !this.previousGroupIndexes.has(index) && index !== 0) { 
+        if (!initial && !this.previousGroupIndexes.has(index) && index !== 0) {
           const targetY = this.initialPositions[index].y;
           child.position.y = targetY + 1;
           gsap.to(child.position, { y: targetY, duration: 1.5, ease: "power2.out" });
@@ -141,8 +127,8 @@ class WebGL {
         } else if (initial) {
           child.position.copy(this.initialPositions[index]);
         }
-      } else if (!initial && this.previousGroupIndexes.has(index) && index !== 0) { 
-        const targetY = this.initialPositions[index].y + 1; 
+      } else if (!initial && this.previousGroupIndexes.has(index) && index !== 0) {
+        const targetY = this.initialPositions[index].y + 1;
         gsap.to(child.position, { y: targetY, duration: 1, ease: "power2.in", onComplete: () => { child.visible = false; } });
       } else {
         child.visible = false;
@@ -164,6 +150,8 @@ class WebGL {
     }
 
     this.previousGroupIndexes = newIndexes;
+    updateProgressBar(this.currentGroupIndex, this.groups.length);
+    updateCardContent(this.groups[groupIndex]);
   }
 
   nextGroup() {
